@@ -1,8 +1,19 @@
-﻿using System;
+﻿using Supvinci;
+using System;
 
-public class Class1
+namespace Gestion { 
+public class Client
 {
-	public Class1()
-	{
-	}
+    public Guid Id { get; set; }
+    public string Firstname { get; set; }
+    public string Lastname { get; set; }
+    public DateTime Birthdate { get; set; }
+    public int PhoneNumb { get; set; }
+    public string Email { get; set; }
+        public int Age
+        {
+            get { return Calculator.CalculateAge(Birthdate); }
+        }
+    }
+
 }
