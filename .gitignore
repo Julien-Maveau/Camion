@@ -9,5 +9,9 @@
 *.user
 *.suo
 
+# Fichiers de configuration locaux contenant des secrets
+.env
+Camion/Camion/appsettings.Development.json
+
 # Fichiers de publication
 publish/
