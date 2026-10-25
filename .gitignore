@@ -1,0 +1,13 @@
+# Fichiers créés par Visual Studio
+.vs/
+
+# Fichiers générés par la compilation .NET
+**/bin/
+**/obj/
+
+# Fichiers utilisateur Visual Studio
+*.user
+*.suo
+
+# Fichiers de publication
+publish/
