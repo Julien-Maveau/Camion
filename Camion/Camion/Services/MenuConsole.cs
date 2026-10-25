@@ -35,6 +35,12 @@ public class MenuConsole
                 case "2":
                     await AfficherVoituresAsync(cancellationToken);
                     break;
+                case "3":
+                    await AfficherFicheClientAsync(cancellationToken);
+                    break;
+                case "4":
+                    await AfficherFicheVoitureAsync(cancellationToken);
+                    break;
                 case "0":
                     _sortie.WriteLine("Au revoir.");
                     return;
@@ -51,6 +57,8 @@ public class MenuConsole
         _sortie.WriteLine("=== Garage Camion ===");
         _sortie.WriteLine("1. Afficher les clients");
         _sortie.WriteLine("2. Afficher les voitures");
+        _sortie.WriteLine("3. Consulter la fiche d'un client");
+        _sortie.WriteLine("4. Consulter la fiche d'une voiture");
         _sortie.WriteLine("0. Quitter");
         _sortie.Write("Votre choix : ");
     }
@@ -85,7 +93,79 @@ public class MenuConsole
         {
             var etat = voiture.EstVendue ? "Vendue" : "Disponible";
             _sortie.WriteLine(
-                $"{voiture.Marque} {voiture.Modele} ({voiture.Annee}) | {voiture.PrixHt.ToString("N2", CultureInfo.GetCultureInfo("fr-FR"))} € HT | {etat}");
+                $"[{voiture.Id}] {voiture.Marque} {voiture.Modele} ({voiture.Annee}) | {voiture.PrixHt.ToString("N2", CultureInfo.GetCultureInfo("fr-FR"))} € HT | {etat}");
+        }
+    }
+
+    private async Task AfficherFicheClientAsync(CancellationToken cancellationToken)
+    {
+        _sortie.Write("E-mail du client : ");
+        var email = _entree.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            _sortie.WriteLine("L'e-mail est obligatoire.");
+            return;
+        }
+
+        var client = await _contexte.Clients
+            .Include(element => element.Voitures)
+            .SingleOrDefaultAsync(element => element.Email == email.Trim(), cancellationToken);
+
+        if (client is null)
+        {
+            _sortie.WriteLine("Client introuvable.");
+            return;
+        }
+
+        _sortie.WriteLine();
+        _sortie.WriteLine("--- Fiche client ---");
+        _sortie.WriteLine($"Nom : {client.Nom} {client.Prenom}");
+        _sortie.WriteLine($"Date de naissance : {client.DateNaissance:dd/MM/yyyy}");
+        _sortie.WriteLine($"Téléphone : {client.Telephone}");
+        _sortie.WriteLine($"E-mail : {client.Email}");
+        _sortie.WriteLine("Voitures :");
+
+        foreach (var voiture in client.Voitures.OrderBy(element => element.Marque).ThenBy(element => element.Modele))
+        {
+            _sortie.WriteLine($"- {voiture.Marque} {voiture.Modele} ({voiture.Annee})");
+        }
+    }
+
+    private async Task AfficherFicheVoitureAsync(CancellationToken cancellationToken)
+    {
+        _sortie.Write("Identifiant de la voiture : ");
+        var identifiant = _entree.ReadLine();
+
+        if (!Guid.TryParse(identifiant, out var idVoiture))
+        {
+            _sortie.WriteLine("L'identifiant de la voiture est invalide.");
+            return;
+        }
+
+        var voiture = await _contexte.Voitures
+            .Include(element => element.Clients)
+            .SingleOrDefaultAsync(element => element.Id == idVoiture, cancellationToken);
+
+        if (voiture is null)
+        {
+            _sortie.WriteLine("Voiture introuvable.");
+            return;
+        }
+
+        _sortie.WriteLine();
+        _sortie.WriteLine("--- Fiche voiture ---");
+        _sortie.WriteLine($"Modèle : {voiture.Marque} {voiture.Modele}");
+        _sortie.WriteLine($"Année : {voiture.Annee}");
+        _sortie.WriteLine($"Couleur : {voiture.Couleur}");
+        _sortie.WriteLine($"Prix HT : {voiture.PrixHt.ToString("N2", CultureInfo.GetCultureInfo("fr-FR"))} €");
+        _sortie.WriteLine($"État : {(voiture.EstVendue ? "Vendue" : "Disponible")}");
+        _sortie.WriteLine($"Date de vente : {voiture.DateVente?.ToString("dd/MM/yyyy") ?? "Non renseignée"}");
+        _sortie.WriteLine("Client(s) :");
+
+        foreach (var client in voiture.Clients.OrderBy(element => element.Nom).ThenBy(element => element.Prenom))
+        {
+            _sortie.WriteLine($"- {client.Nom} {client.Prenom} | {client.Email}");
         }
     }
 }
