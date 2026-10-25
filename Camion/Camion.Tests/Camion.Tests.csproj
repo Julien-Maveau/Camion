@@ -17,6 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="../Camion/Data/client.csv" Link="Data/client.csv" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Camion/Data/voiture.csv" Link="Data/voiture.csv" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Camion/Camion.csproj" />
   </ItemGroup>
 </Project>
