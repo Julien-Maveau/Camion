@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "Garage": "Host=localhost;Port=5432;Database=camion;Username=camion;Password=à-remplacer"
+  }
+}

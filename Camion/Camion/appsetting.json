@@ -1,8 +1,0 @@
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=4432;Database=cours_sup_de_vinci;Username=devinci;Password=devinci_dev_password"
-  },
-  "CSVFiles": {
-    "CoursSupDeVinci": "/Users/antosox/Projects/CoursSupDeVinci/CoursSupDeVinci/Data/CoursSupDeVinci_C#_2026.csv"
-  }
-}
