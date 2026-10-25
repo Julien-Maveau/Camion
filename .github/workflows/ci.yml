@@ -1,0 +1,38 @@
+name: Vérification du projet C#
+
+on:
+  push:
+    branches:
+      - main
+      - chore/**
+      - feat/**
+      - fix/**
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  tester:
+    name: Compiler et tester
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer le SDK .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restaurer les dépendances
+        run: dotnet restore Camion/Camion.slnx
+
+      - name: Compiler la solution
+        run: dotnet build Camion/Camion.slnx --no-restore --configuration Release
+
+      - name: Exécuter les tests
+        run: dotnet test Camion/Camion.slnx --no-build --configuration Release --verbosity normal
