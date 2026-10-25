@@ -151,4 +151,58 @@ public class MenuConsoleTests
         Assert.Contains("Bleu", texte);
         Assert.Contains("Martin Léa", texte);
     }
+
+    [Fact]
+    public async Task ExecuterAsync_vend_une_voiture_disponible()
+    {
+        var options = new DbContextOptionsBuilder<GarageDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        await using var contexte = new GarageDbContext(options);
+        var client = new Client
+        {
+            Nom = "Martin",
+            Prenom = "Léa",
+            DateNaissance = new DateTime(1994, 3, 18),
+            Telephone = "0612345678",
+            Email = "lea.martin@example.com"
+        };
+        var voiture = new Voiture
+        {
+            Marque = "Renault",
+            Modele = "Clio",
+            Annee = 2021,
+            PrixHt = 12500m,
+            Couleur = "Bleu",
+            EstVendue = false
+        };
+        contexte.AddRange(client, voiture);
+        await contexte.SaveChangesAsync();
+
+        using var entree = new StringReader($"5\n{voiture.Id}\n{client.Email}\n0\n");
+        using var sortie = new StringWriter();
+        var menu = new MenuConsole(contexte, entree, sortie);
+
+        await menu.ExecuterAsync();
+
+        Assert.True(voiture.EstVendue);
+        Assert.Contains(client, voiture.Clients);
+        Assert.Contains("La voiture a été vendue.", sortie.ToString());
+    }
+
+    [Fact]
+    public async Task ExecuterAsync_quitte_proprement_lorsque_l_entree_est_terminee()
+    {
+        var options = new DbContextOptionsBuilder<GarageDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        await using var contexte = new GarageDbContext(options);
+        using var entree = new StringReader(string.Empty);
+        using var sortie = new StringWriter();
+        var menu = new MenuConsole(contexte, entree, sortie);
+
+        await menu.ExecuterAsync();
+
+        Assert.Contains("Au revoir.", sortie.ToString());
+    }
 }

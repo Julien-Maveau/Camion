@@ -26,6 +26,11 @@ public class MenuConsole
         {
             AfficherChoix();
             var choix = _entree.ReadLine();
+            if (choix is null)
+            {
+                _sortie.WriteLine("Au revoir.");
+                return;
+            }
 
             switch (choix)
             {
@@ -40,6 +45,15 @@ public class MenuConsole
                     break;
                 case "4":
                     await AfficherFicheVoitureAsync(cancellationToken);
+                    break;
+                case "5":
+                    await VendreVoitureAsync(cancellationToken);
+                    break;
+                case "6":
+                    await EchangerVoitureAsync(cancellationToken);
+                    break;
+                case "7":
+                    await AfficherChiffreAffairesHebdomadaireAsync(cancellationToken);
                     break;
                 case "0":
                     _sortie.WriteLine("Au revoir.");
@@ -59,6 +73,9 @@ public class MenuConsole
         _sortie.WriteLine("2. Afficher les voitures");
         _sortie.WriteLine("3. Consulter la fiche d'un client");
         _sortie.WriteLine("4. Consulter la fiche d'une voiture");
+        _sortie.WriteLine("5. Vendre une voiture");
+        _sortie.WriteLine("6. Échanger une voiture");
+        _sortie.WriteLine("7. Afficher le chiffre d'affaires hebdomadaire");
         _sortie.WriteLine("0. Quitter");
         _sortie.Write("Votre choix : ");
     }
@@ -167,5 +184,71 @@ public class MenuConsole
         {
             _sortie.WriteLine($"- {client.Nom} {client.Prenom} | {client.Email}");
         }
+    }
+
+    private async Task VendreVoitureAsync(CancellationToken cancellationToken)
+    {
+        _sortie.Write("Identifiant de la voiture à vendre : ");
+        if (!Guid.TryParse(_entree.ReadLine(), out var idVoiture))
+        {
+            _sortie.WriteLine("L'identifiant de la voiture est invalide.");
+            return;
+        }
+
+        _sortie.Write("E-mail du client : ");
+        var emailClient = _entree.ReadLine();
+        if (string.IsNullOrWhiteSpace(emailClient))
+        {
+            _sortie.WriteLine("L'e-mail est obligatoire.");
+            return;
+        }
+
+        var resultat = await new ServiceVente(_contexte).VendreAsync(
+            idVoiture,
+            emailClient.Trim(),
+            DateTime.UtcNow,
+            cancellationToken);
+        _sortie.WriteLine(resultat.Message);
+    }
+
+    private async Task EchangerVoitureAsync(CancellationToken cancellationToken)
+    {
+        _sortie.Write("Identifiant de la voiture actuelle : ");
+        if (!Guid.TryParse(_entree.ReadLine(), out var idAncienneVoiture))
+        {
+            _sortie.WriteLine("L'identifiant de la voiture est invalide.");
+            return;
+        }
+
+        _sortie.Write("Identifiant de la nouvelle voiture : ");
+        if (!Guid.TryParse(_entree.ReadLine(), out var idNouvelleVoiture))
+        {
+            _sortie.WriteLine("L'identifiant de la voiture est invalide.");
+            return;
+        }
+
+        _sortie.Write("E-mail du client : ");
+        var emailClient = _entree.ReadLine();
+        if (string.IsNullOrWhiteSpace(emailClient))
+        {
+            _sortie.WriteLine("L'e-mail est obligatoire.");
+            return;
+        }
+
+        var resultat = await new ServiceVente(_contexte).EchangerAsync(
+            idAncienneVoiture,
+            idNouvelleVoiture,
+            emailClient.Trim(),
+            DateTime.UtcNow,
+            cancellationToken);
+        _sortie.WriteLine(resultat.Message);
+    }
+
+    private async Task AfficherChiffreAffairesHebdomadaireAsync(CancellationToken cancellationToken)
+    {
+        var chiffreAffaires = await new ServiceStatistiques(_contexte)
+            .CalculerChiffreAffairesHebdomadaireAsync(DateTime.UtcNow, cancellationToken);
+        _sortie.WriteLine(
+            $"Chiffre d'affaires HT de la semaine : {chiffreAffaires.ToString("N2", CultureInfo.GetCultureInfo("fr-FR"))} €");
     }
 }
