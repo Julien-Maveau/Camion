@@ -23,8 +23,7 @@ public class Voiture
     public DateTime? DateVente { get; set; }
 
     /// <summary>
-    /// Clients liés à la voiture. La relation many-to-many sera configurée
-    /// avec Entity Framework à l'étape dédiée.
+    /// Clients liés à la voiture par la relation plusieurs-à-plusieurs configurée dans Entity Framework Core.
     /// </summary>
     public ICollection<Client> Clients { get; } = new List<Client>();
 }
